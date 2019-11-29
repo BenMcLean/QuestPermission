@@ -2,12 +2,12 @@
 
 importer="scene"
 type="PackedScene"
-path="res://.import/OculusQuestTouchController_Right.gltf-cdf33ed98b3c4538748688830969f3a1.scn"
+path="res://.import/OculusQuestTouchController_Left.gltf-8c6bcf0c6eb7a4223a94539a3fe95ef1.scn"
 
 [deps]
 
-source_file="res://models3d/OculusQuestTouchController_Right.gltf"
-dest_files=[ "res://.import/OculusQuestTouchController_Right.gltf-cdf33ed98b3c4538748688830969f3a1.scn" ]
+source_file="res://OQ_Toolkit/OQ_ARVRController/models3d/OculusQuestTouchController_Left.gltf"
+dest_files=[ "res://.import/OculusQuestTouchController_Left.gltf-8c6bcf0c6eb7a4223a94539a3fe95ef1.scn" ]
 
 [params]
 
