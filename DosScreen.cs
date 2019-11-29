@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-public class DosScreen : Godot.Spatial
+public class DosScreen : Spatial
 {
     public class VirtualScreenText
     {
@@ -59,7 +59,7 @@ public class DosScreen : Godot.Spatial
         public VirtualScreenText SetCursor(uint x, uint y)
         {
             if (Cursor != null)
-                Cursor.RectGlobalPosition = new Godot.Vector2(x * 9, y * 16 + 14);
+                Cursor.RectGlobalPosition = new Godot.Vector2(x * 9, y * 16 + 12);
             return this;
         }
 
