@@ -36,16 +36,16 @@ public class Main : Spatial
         {
             Current = true,
         });
-        LeftController = new ARVRController()
+        ARVROrigin.AddChild(LeftController = new ARVRController()
         {
             ControllerId = 1,
-        };
-        //LeftController.AddChild(ResourceLoader.Load("res://models3d/OculusQuestTouchController_Left.gltf") as Spatial);
-
-        RightController = new ARVRController()
+        });
+        //LeftController.AddChild(GD.Load<PackedScene>("res://models3d/OculusQuestTouchController_Left.gltf").Instance());
+        ARVROrigin.AddChild(RightController = new ARVRController()
         {
             ControllerId = 2,
-        };
+        });
+        //RightController.AddChild(GD.Load<PackedScene>("res://models3d/OculusQuestTouchController_Right.gltf").Instance());
 
         AddChild(new WorldEnvironment()
         {
@@ -65,9 +65,6 @@ public class Main : Spatial
 
         switch (OS.GetName())
         {
-            //case "Windows":
-            //    path = "";
-            //    break;
             case "Android":
                 Path = "/storage/emulated/0/";
                 State = LoadingState.ASK_PERMISSION;
