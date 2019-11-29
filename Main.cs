@@ -3,78 +3,98 @@ using System;
 
 public class Main : Spatial
 {
-	public string Path { get; set; } = "";
-	public ARVRInterface ARVRInterface { get; set; }
+    public string Path { get; set; } = "";
+    public ARVRInterface ARVRInterface { get; set; }
+    public ARVROrigin ARVROrigin { get; set; }
+    public ARVRCamera ARVRCamera { get; set; }
+    public ARVRController LeftController { get; set; }
+    public ARVRController RightController { get; set; }
 
-	public enum LoadingState
-	{
-		ASK_PERMISSION,
-		DOWNLOAD_SHAREWARE
-	};
+    public enum LoadingState
+    {
+        ASK_PERMISSION,
+        DOWNLOAD_SHAREWARE
+    };
 
-	public LoadingState State { get; set; }
+    public LoadingState State { get; set; }
 
-	private DosScreen DosScreen;
+    private DosScreen DosScreen;
 
-	public override void _Ready()
-	{
-		VisualServer.SetDefaultClearColor(Color.Color8(0, 0, 0, 255));
+    public override void _Ready()
+    {
+        VisualServer.SetDefaultClearColor(Color.Color8(0, 0, 0, 255));
 
-		//Camera camera = new Camera()
-		//{
-		//	Current = true,
-		//};
-		//camera.SetScript(ResourceLoader.Load("res://maujoe.camera_control/camera_control.gd") as GDScript);
-		//AddChild(camera);
+        //Camera camera = new Camera()
+        //{
+        //	Current = true,
+        //};
+        //camera.SetScript(ResourceLoader.Load("res://maujoe.camera_control/camera_control.gd") as GDScript);
+        //AddChild(camera);
 
-		ARVROrigin aRVROrigin = new ARVROrigin();
-		AddChild(aRVROrigin);
-		ARVRCamera aRVRCamera = new ARVRCamera()
-		{
-			Current = true,
-		};
-		aRVROrigin.AddChild(aRVRCamera);
+        AddChild(ARVROrigin = new ARVROrigin());
+        ARVROrigin.AddChild(ARVRCamera = new ARVRCamera()
+        {
+            Current = true,
+        });
+        LeftController = new ARVRController()
+        {
+            ControllerId = 1,
+        };
+        //LeftController.AddChild(ResourceLoader.Load("res://models3d/OculusQuestTouchController_Left.gltf") as Spatial);
 
-		AddChild(new WorldEnvironment()
-		{
-			Environment = new Godot.Environment()
-			{
-				BackgroundColor = Color.Color8(0, 0, 0, 255),
-				BackgroundMode = Godot.Environment.BGMode.Color,
-			},
-		});
+        RightController = new ARVRController()
+        {
+            ControllerId = 2,
+        };
 
-		AddChild(DosScreen = new DosScreen()
-		{
-			GlobalTransform = new Transform(Basis.Identity, new Vector3(0, 0, -2)),
-		});
+        AddChild(new WorldEnvironment()
+        {
+            Environment = new Godot.Environment()
+            {
+                BackgroundColor = Color.Color8(0, 0, 0, 255),
+                BackgroundMode = Godot.Environment.BGMode.Color,
+            },
+        });
 
-		DosScreen.Screen.WriteLine("Platform detected: " + OS.GetName());
+        AddChild(DosScreen = new DosScreen()
+        {
+            GlobalTransform = new Transform(Basis.Identity, new Vector3(0, 0, -2)),
+        });
 
-		switch (OS.GetName())
-		{
-			//case "Windows":
-			//    path = "";
-			//    break;
-			case "Android":
-				Path = "/storage/emulated/0/";
-				State = LoadingState.ASK_PERMISSION;
-				ARVRInterface = ARVRServer.FindInterface("OVRMobile");
-				break;
-			default:
-				State = LoadingState.DOWNLOAD_SHAREWARE;
-				ARVRInterface = ARVRServer.FindInterface("OpenVR");
-				break;
-		}
+        DosScreen.Screen.WriteLine("Platform detected: " + OS.GetName());
 
-		if (ARVRInterface != null && ARVRInterface.Initialize())
-			GetViewport().Arvr = true;
+        switch (OS.GetName())
+        {
+            //case "Windows":
+            //    path = "";
+            //    break;
+            case "Android":
+                Path = "/storage/emulated/0/";
+                State = LoadingState.ASK_PERMISSION;
+                ARVRInterface = ARVRServer.FindInterface("OVRMobile");
+                break;
+            default:
+                State = LoadingState.DOWNLOAD_SHAREWARE;
+                ARVRInterface = ARVRServer.FindInterface("OpenVR");
+                break;
+        }
 
-		DosScreen.Screen.WriteLine("Current loading state: " + State);
-	}
+        if (ARVRInterface != null && ARVRInterface.Initialize())
+            GetViewport().Arvr = true;
 
-	//  public override void _Process(float delta)
-	//  {
-	//      
-	//  }
+        DosScreen.Screen.WriteLine("Current loading state: " + State);
+    }
+
+    public override void _Process(float delta)
+    {
+    }
+
+    public override void _Input(InputEvent @event)
+    {
+        base._Input(@event);
+
+        DosScreen.Screen.WriteLine(
+            "InputEvent: \"" + @event + "\""
+            );
+    }
 }
