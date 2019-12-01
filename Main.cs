@@ -80,12 +80,30 @@ public class Main : Spatial
 			GetViewport().Arvr = true;
 
 		DosScreen.Screen.WriteLine("Current loading state: " + State);
+
+		LeftController.Connect("button_pressed", this, nameof(LeftControllerButtonPressed));
+		RightController.Connect("button_pressed", this, nameof(RightControllerButtonPressed));
 	}
 
-	public override void _Process(float delta)
+	public void LeftControllerButtonPressed(int buttonIndex)
 	{
+		DosScreen.Screen.WriteLine(
+			"Left controller, buttonIndex: \"" + buttonIndex + "\""
+		);
 	}
 
+	public void RightControllerButtonPressed(int buttonIndex)
+	{
+		DosScreen.Screen.WriteLine(
+			"Right controller, buttonIndex: \"" + buttonIndex + "\""
+		);
+	}
+
+	//public override void _Process(float delta)
+	//{
+	//}
+
+	/*
 	public override void _Input(InputEvent @event)
 	{
 		base._Input(@event);
@@ -94,4 +112,5 @@ public class Main : Spatial
 			"InputEvent: \"" + @event + "\""
 			);
 	}
+	*/
 }
