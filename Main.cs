@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Linq;
 
 public class Main : Spatial
@@ -46,13 +45,6 @@ public class Main : Spatial
     {
         VisualServer.SetDefaultClearColor(Color.Color8(0, 0, 0, 255));
 
-        //Camera camera = new Camera()
-        //{
-        //	Current = true,
-        //};
-        //camera.SetScript(ResourceLoader.Load("res://maujoe.camera_control/camera_control.gd") as GDScript);
-        //AddChild(camera);
-
         AddChild(ARVROrigin = new ARVROrigin());
         ARVROrigin.AddChild(ARVRCamera = new ARVRCamera()
         {
@@ -90,7 +82,7 @@ public class Main : Spatial
             case "Android":
                 Path = "/storage/emulated/0/";
                 ARVRInterface = ARVRServer.FindInterface("OVRMobile");
-                State = LoadingState.ASK_PERMISSION;
+                State = PermissionsGranted ? LoadingState.DOWNLOAD_SHAREWARE : LoadingState.ASK_PERMISSION;
                 break;
             default:
                 ARVRInterface = ARVRServer.FindInterface("OpenVR");
@@ -122,14 +114,22 @@ public class Main : Spatial
         }
     }
 
+    public bool PermissionsGranted
+    {
+        get
+        {
+            string[] permissions = OS.GetGrantedPermissions();
+            return permissions.Contains("android.permission.READ_EXTERNAL_STORAGE") && permissions.Contains("android.permission.WRITE_EXTERNAL_STORAGE");
+        }
+    }
+
     public void ButtonPressed(int buttonIndex)
     {
         if (IsVRButton(buttonIndex))
             switch (State)
             {
                 case LoadingState.ASK_PERMISSION:
-                    string[] permissions = OS.GetGrantedPermissions();
-                    if (permissions.Contains("android.permission.READ_EXTERNAL_STORAGE") && permissions.Contains("android.permission.WRITE_EXTERNAL_STORAGE"))
+                    if (PermissionsGranted)
                         State = LoadingState.DOWNLOAD_SHAREWARE;
                     else
                         OS.RequestPermissions();
