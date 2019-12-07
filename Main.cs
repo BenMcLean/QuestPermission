@@ -87,16 +87,44 @@ public class Main : Spatial
 
 	public void LeftControllerButtonPressed(int buttonIndex)
 	{
-		DosScreen.Screen.WriteLine(
-			"Left controller, buttonIndex: \"" + buttonIndex + "\""
-		);
+		switch (buttonIndex)
+		{
+			case (int)JoystickList.VrGrip:
+			case (int)JoystickList.VrPad:
+			case (int)JoystickList.VrAnalogGrip:
+			//case (int)JoystickList.VrAnalogTrigger:
+			case (int)JoystickList.VrTrigger:
+			case (int)JoystickList.OculusAx:
+			case (int)JoystickList.OculusBy:
+			case (int)JoystickList.OculusMenu:
+				DosScreen.Screen.WriteLine(
+			"Left controller, name: \"" + (JoystickList)buttonIndex + "\", buttonIndex: \"" + buttonIndex + "\""
+				);
+				break;
+			default:
+				break;
+		}
 	}
 
 	public void RightControllerButtonPressed(int buttonIndex)
 	{
-		DosScreen.Screen.WriteLine(
-			"Right controller, buttonIndex: \"" + buttonIndex + "\""
+		switch (buttonIndex)
+		{
+			case (int)JoystickList.VrGrip:
+			case (int)JoystickList.VrPad:
+			case (int)JoystickList.VrAnalogGrip:
+			//case (int)JoystickList.VrAnalogTrigger:
+			case (int)JoystickList.VrTrigger:
+			case (int)JoystickList.OculusAx:
+			case (int)JoystickList.OculusBy:
+			case (int)JoystickList.OculusMenu:
+				DosScreen.Screen.WriteLine(
+			"Right controller, name: \"" + (JoystickList)buttonIndex + "\", buttonIndex: \"" + buttonIndex + "\""
 		);
+				break;
+			default:
+				break;
+		}
 	}
 
 	//public override void _Process(float delta)
