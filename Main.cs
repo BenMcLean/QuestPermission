@@ -1,137 +1,147 @@
 using Godot;
 using System;
+using System.Linq;
 
 public class Main : Spatial
 {
-	public string Path { get; set; } = "";
-	public ARVRInterface ARVRInterface { get; set; }
-	public ARVROrigin ARVROrigin { get; set; }
-	public ARVRCamera ARVRCamera { get; set; }
-	public ARVRController LeftController { get; set; }
-	public ARVRController RightController { get; set; }
+    public string Path { get; set; } = "";
+    public ARVRInterface ARVRInterface { get; set; }
+    public ARVROrigin ARVROrigin { get; set; }
+    public ARVRCamera ARVRCamera { get; set; }
+    public ARVRController LeftController { get; set; }
+    public ARVRController RightController { get; set; }
 
-	public enum LoadingState
-	{
-		ASK_PERMISSION,
-		DOWNLOAD_SHAREWARE
-	};
+    public enum LoadingState
+    {
+        ASK_PERMISSION,
+        DOWNLOAD_SHAREWARE
+    };
 
-	public LoadingState State { get; set; }
+    private LoadingState state;
+    public LoadingState State
+    {
+        get
+        {
+            return state;
+        }
+        set
+        {
+            state = value;
+            switch (State)
+            {
+                case LoadingState.ASK_PERMISSION:
+                    DosScreen.Screen.WriteLine("This application requires permission to both read and write to your device's external storage.");
+                    DosScreen.Screen.WriteLine("Press any button to open permission request.");
+                    break;
+                case LoadingState.DOWNLOAD_SHAREWARE:
+                    DosScreen.Screen.WriteLine("Downloading shareware!");
+                    break;
+            }
+        }
+    }
 
-	private DosScreen DosScreen;
+    private DosScreen DosScreen;
 
-	public override void _Ready()
-	{
-		VisualServer.SetDefaultClearColor(Color.Color8(0, 0, 0, 255));
+    public override void _Ready()
+    {
+        VisualServer.SetDefaultClearColor(Color.Color8(0, 0, 0, 255));
 
-		//Camera camera = new Camera()
-		//{
-		//	Current = true,
-		//};
-		//camera.SetScript(ResourceLoader.Load("res://maujoe.camera_control/camera_control.gd") as GDScript);
-		//AddChild(camera);
+        //Camera camera = new Camera()
+        //{
+        //	Current = true,
+        //};
+        //camera.SetScript(ResourceLoader.Load("res://maujoe.camera_control/camera_control.gd") as GDScript);
+        //AddChild(camera);
 
-		AddChild(ARVROrigin = new ARVROrigin());
-		ARVROrigin.AddChild(ARVRCamera = new ARVRCamera()
-		{
-			Current = true,
-		});
-		ARVROrigin.AddChild(LeftController = new ARVRController()
-		{
-			ControllerId = 1,
-		});
-		LeftController.AddChild(GD.Load<PackedScene>("res://OQ_Toolkit/OQ_ARVRController/models3d/OculusQuestTouchController_Left.gltf").Instance());
-		ARVROrigin.AddChild(RightController = new ARVRController()
-		{
-			ControllerId = 2,
-		});
-		RightController.AddChild(GD.Load<PackedScene>("res://OQ_Toolkit/OQ_ARVRController/models3d/OculusQuestTouchController_Right.gltf").Instance());
+        AddChild(ARVROrigin = new ARVROrigin());
+        ARVROrigin.AddChild(ARVRCamera = new ARVRCamera()
+        {
+            Current = true,
+        });
+        ARVROrigin.AddChild(LeftController = new ARVRController()
+        {
+            ControllerId = 1,
+        });
+        LeftController.AddChild(GD.Load<PackedScene>("res://OQ_Toolkit/OQ_ARVRController/models3d/OculusQuestTouchController_Left.gltf").Instance());
+        ARVROrigin.AddChild(RightController = new ARVRController()
+        {
+            ControllerId = 2,
+        });
+        RightController.AddChild(GD.Load<PackedScene>("res://OQ_Toolkit/OQ_ARVRController/models3d/OculusQuestTouchController_Right.gltf").Instance());
 
-		AddChild(new WorldEnvironment()
-		{
-			Environment = new Godot.Environment()
-			{
-				BackgroundColor = Color.Color8(0, 0, 0, 255),
-				BackgroundMode = Godot.Environment.BGMode.Color,
-			},
-		});
+        AddChild(new WorldEnvironment()
+        {
+            Environment = new Godot.Environment()
+            {
+                BackgroundColor = Color.Color8(0, 0, 0, 255),
+                BackgroundMode = Godot.Environment.BGMode.Color,
+            },
+        });
 
-		AddChild(DosScreen = new DosScreen()
-		{
-			GlobalTransform = new Transform(Basis.Identity, new Vector3(0, 0, -2)),
-		});
+        AddChild(DosScreen = new DosScreen()
+        {
+            GlobalTransform = new Transform(Basis.Identity, new Vector3(0, 0, -2)),
+        });
 
-		DosScreen.Screen.WriteLine("Platform detected: " + OS.GetName());
+        DosScreen.Screen.WriteLine("Platform detected: " + OS.GetName());
 
-		switch (OS.GetName())
-		{
-			case "Android":
-				Path = "/storage/emulated/0/";
-				State = LoadingState.ASK_PERMISSION;
-				ARVRInterface = ARVRServer.FindInterface("OVRMobile");
-				break;
-			default:
-				State = LoadingState.DOWNLOAD_SHAREWARE;
-				ARVRInterface = ARVRServer.FindInterface("OpenVR");
-				break;
-		}
+        switch (OS.GetName())
+        {
+            case "Android":
+                Path = "/storage/emulated/0/";
+                ARVRInterface = ARVRServer.FindInterface("OVRMobile");
+                State = LoadingState.ASK_PERMISSION;
+                break;
+            default:
+                ARVRInterface = ARVRServer.FindInterface("OpenVR");
+                State = LoadingState.DOWNLOAD_SHAREWARE;
+                break;
+        }
 
-		if (ARVRInterface != null && ARVRInterface.Initialize())
-			GetViewport().Arvr = true;
+        if (ARVRInterface != null && ARVRInterface.Initialize())
+            GetViewport().Arvr = true;
 
-		DosScreen.Screen.WriteLine("Current loading state: " + State);
+        LeftController.Connect("button_pressed", this, nameof(ButtonPressed));
+        RightController.Connect("button_pressed", this, nameof(ButtonPressed));
+    }
 
-		LeftController.Connect("button_pressed", this, nameof(LeftControllerButtonPressed));
-		RightController.Connect("button_pressed", this, nameof(RightControllerButtonPressed));
-	}
+    public static bool IsVRButton(int buttonIndex)
+    {
+        switch (buttonIndex)
+        {
+            case (int)JoystickList.VrGrip:
+            case (int)JoystickList.VrPad:
+            case (int)JoystickList.VrAnalogGrip:
+            case (int)JoystickList.VrTrigger:
+            case (int)JoystickList.OculusAx:
+            case (int)JoystickList.OculusBy:
+            case (int)JoystickList.OculusMenu:
+                return true;
+            default:
+                return false;
+        }
+    }
 
-	public void LeftControllerButtonPressed(int buttonIndex)
-	{
-		switch (buttonIndex)
-		{
-			case (int)JoystickList.VrGrip:
-			case (int)JoystickList.VrPad:
-			case (int)JoystickList.VrAnalogGrip:
-			//case (int)JoystickList.VrAnalogTrigger:
-			case (int)JoystickList.VrTrigger:
-			case (int)JoystickList.OculusAx:
-			case (int)JoystickList.OculusBy:
-			case (int)JoystickList.OculusMenu:
-				DosScreen.Screen.WriteLine(
-			"Left controller, name: \"" + (JoystickList)buttonIndex + "\", buttonIndex: \"" + buttonIndex + "\""
-				);
-				break;
-			default:
-				break;
-		}
-	}
+    public void ButtonPressed(int buttonIndex)
+    {
+        if (IsVRButton(buttonIndex))
+            switch (State)
+            {
+                case LoadingState.ASK_PERMISSION:
+                    string[] permissions = OS.GetGrantedPermissions();
+                    if (permissions.Contains("android.permission.READ_EXTERNAL_STORAGE") && permissions.Contains("android.permission.WRITE_EXTERNAL_STORAGE"))
+                        State = LoadingState.DOWNLOAD_SHAREWARE;
+                    else
+                        OS.RequestPermissions();
+                    break;
+            }
+    }
 
-	public void RightControllerButtonPressed(int buttonIndex)
-	{
-		switch (buttonIndex)
-		{
-			case (int)JoystickList.VrGrip:
-			case (int)JoystickList.VrPad:
-			case (int)JoystickList.VrAnalogGrip:
-			//case (int)JoystickList.VrAnalogTrigger:
-			case (int)JoystickList.VrTrigger:
-			case (int)JoystickList.OculusAx:
-			case (int)JoystickList.OculusBy:
-			case (int)JoystickList.OculusMenu:
-				DosScreen.Screen.WriteLine(
-			"Right controller, name: \"" + (JoystickList)buttonIndex + "\", buttonIndex: \"" + buttonIndex + "\""
-		);
-				break;
-			default:
-				break;
-		}
-	}
+    //public override void _Process(float delta)
+    //{
+    //}
 
-	//public override void _Process(float delta)
-	//{
-	//}
-
-	/*
+    /*
 	public override void _Input(InputEvent @event)
 	{
 		base._Input(@event);
